@@ -16,25 +16,25 @@ class Todo(db.Model):
 
 @app.route('/todos/create', methods=['POST'])
 def create_todo():
-  error = False
   body = {}
+  error = False
   try:
     description = request.get_json()['description']
     todo = Todo(description=description)
+    body['description'] = todo.description
     db.session.add(todo)
     db.session.commit()
-    body['description'] = todo.description
   except:
     error = True
     db.session.rollback()
     print(sys.exc_info())
   finally:
     db.session.close()
+    if error == True:
+      abort(400)
+    else:
+      return jsonify(body)
   
-  if error:
-    abort(400)
-  else:
-    return jsonify(body)
 
 
 @app.route('/')
